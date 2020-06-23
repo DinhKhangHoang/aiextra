@@ -124,8 +124,13 @@ const Controller = (props) => {
             <CardSubtitle className="text-primary">
               Choose start node and end node.
             </CardSubtitle>
-            <CardText>Start node: </CardText>
-            <CardText>End node: </CardText>
+            <CardText>
+              Start node:{" "}
+              {props.path.start < 0 ? "" : props.path.start.toString()}
+            </CardText>
+            <CardText>
+              End node: {props.path.end < 0 ? "" : props.path.end.toString()}
+            </CardText>
           </CardBody>
           <Button className="btn btn-primary" onClick={getCalculate}>
             Calculate the path

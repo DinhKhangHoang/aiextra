@@ -12,6 +12,8 @@ export class App extends Component {
   state = {
     stores: location.points,
     edges: location.edges,
+    start: -1,
+    end: -1,
   };
 
   displayMarker = () => {
@@ -24,7 +26,7 @@ export class App extends Component {
             lat: store.lat,
             lng: store.lng,
           }}
-          label={(index + 1).toString()}
+          label={index.toString()}
           onClick={() => this.onClickMarker(index)}
         />
       );
@@ -56,6 +58,9 @@ export class App extends Component {
 
   onClickMarker = (index) => {
     console.log(index);
+    if (this.state.start < 0) this.setState({ start: index });
+    else if (this.state.end < 0) this.setState({ end: index });
+    else this.setState({ start: index, end: -1 });
   };
 
   fetchPlace = (mapProps, map) => {};
@@ -95,7 +100,7 @@ export class App extends Component {
           {this.displayMarker()}
           {this.displayPolyline()}
         </Map>
-        <Controller />
+        <Controller path={{ start: this.state.start, end: this.state.end }} />
       </Aux>
     );
   }
