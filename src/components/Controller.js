@@ -25,6 +25,7 @@ const Controller = (props) => {
 
   function getCalculate() {
     setIsCalculate(true);
+    props.calculate();
   }
 
   function closeCalculate() {

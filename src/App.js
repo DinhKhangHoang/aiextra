@@ -3,6 +3,20 @@ import { Map, GoogleApiWrapper, Marker, Polyline } from "google-maps-react";
 import Aux from "./hoc/Aux";
 import { location } from "./Key/Location";
 import Controller from "./components/Controller";
+import axios from "axios";
+
+function adjacent2Matrix(adjacent) {
+  return Object.keys(adjacent)
+    .map((vertex, index) => {
+      return Object.keys(adjacent[vertex]).map((adjvertex, index) => {
+        return { idxStart: vertex, idxEnd: adjvertex };
+      });
+    })
+    .flat();
+}
+
+const edges = adjacent2Matrix(location.adjacent);
+
 const mapStyles = {
   width: "100%",
   height: "100%",
@@ -10,39 +24,37 @@ const mapStyles = {
 
 export class App extends Component {
   state = {
-    stores: location.points,
-    edges: location.edges,
     start: -1,
     end: -1,
   };
 
   displayMarker = () => {
-    return this.state.stores.map((store, index) => {
+    return Object.keys(location.points).map((key, index) => {
       return (
         <Marker
-          key={index}
-          id={index}
+          key={key}
+          id={key}
           position={{
-            lat: store.lat,
-            lng: store.lng,
+            lat: location.points[key].lat,
+            lng: location.points[key].lng,
           }}
-          label={index.toString()}
-          onClick={() => this.onClickMarker(index)}
+          label={key.toString()}
+          onClick={() => this.onClickMarker(key)}
         />
       );
     });
   };
 
   displayPolyline = () => {
-    return this.state.edges.map((edge, index) => {
+    return edges.map((edge, index) => {
       let line = [
         {
-          lat: this.state.stores[edge.idxStart].lat,
-          lng: this.state.stores[edge.idxStart].lng,
+          lat: location.points[edge.idxStart].lat,
+          lng: location.points[edge.idxStart].lng,
         },
         {
-          lat: this.state.stores[edge.idxEnd].lat,
-          lng: this.state.stores[edge.idxEnd].lng,
+          lat: location.points[edge.idxEnd].lat,
+          lng: location.points[edge.idxEnd].lng,
         },
       ];
       return (
@@ -65,22 +77,21 @@ export class App extends Component {
 
   fetchPlace = (mapProps, map) => {};
 
-  mapClicked = (mapProps, map, clickEvent) => {
-    // console.log(clickEvent);
-    // const { latLng } = clickEvent;
-    // const lat = latLng.lat();
-    // const lng = latLng.lng();
-    // this.setState((previousState) => {
-    //   return {
-    //     stores: [
-    //       ...previousState.stores,
-    //       {
-    //         lat: lat,
-    //         lng: lng,
-    //       },
-    //     ],
-    //   };
-    // });
+  handleCalculate = (method = "a-star") => {
+    axios
+      .post("http://localhost:5000/" + method, {
+        location: location,
+        start: this.state.start,
+        end: this.state.end,
+      })
+      .then(
+        (response) => {
+          console.log(response);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
   };
 
   render() {
@@ -100,7 +111,10 @@ export class App extends Component {
           {this.displayMarker()}
           {this.displayPolyline()}
         </Map>
-        <Controller path={{ start: this.state.start, end: this.state.end }} />
+        <Controller
+          path={{ start: this.state.start, end: this.state.end }}
+          calculate={this.handleCalculate}
+        />
       </Aux>
     );
   }
