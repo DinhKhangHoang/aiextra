@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Map, GoogleApiWrapper, Marker, Polyline } from "google-maps-react";
-import Aux from "./hoc/Aux";
+import Aus from "./hoc/Aus";
 import { location } from "./Key/Location";
 import Controller from "./components/Controller";
 import axios from "axios";
@@ -62,7 +62,7 @@ export class App extends Component {
           path={line}
           strokeColor="red"
           strokeOpacity={0.8}
-          strokeWeight={4}
+          strokeWeight={2}
         />
       );
     });
@@ -96,7 +96,7 @@ export class App extends Component {
 
   render() {
     return (
-      <Aux>
+      <Aus>
         <Map
           google={this.props.google}
           onReady={this.fetchPlace}
@@ -115,7 +115,7 @@ export class App extends Component {
           path={{ start: this.state.start, end: this.state.end }}
           calculate={this.handleCalculate}
         />
-      </Aux>
+      </Aus>
     );
   }
 }

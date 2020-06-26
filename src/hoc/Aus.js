@@ -1,7 +1,7 @@
 import React from "react";
 
-const aux = (props) => {
+const aus = (props) => {
   return props.children;
 };
 
-export default aux;
+export default aus;
