@@ -8,4 +8,16 @@ function adjacent2List(adjacent) {
     .flat();
 }
 
+function latLng2Meter(points) {
+  function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+  }
+
+  var result = {};
+  var r = 6371;
+  return Object.keys(points).map((point, index) => {
+    result[point] = [];
+  });
+}
+
 export { adjacent2List };

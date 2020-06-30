@@ -1,5 +1,11 @@
 import React, { Component } from "react";
-import { Map, GoogleApiWrapper, Marker, Polyline } from "google-maps-react";
+import {
+  Map,
+  GoogleApiWrapper,
+  Marker,
+  Polyline,
+  InfoWindow,
+} from "google-maps-react";
 import Aus from "./hoc/Aus";
 import { location } from "./Key/Location";
 import Controller from "./components/Controller";
@@ -53,27 +59,8 @@ class App extends Component {
         });
   };
 
-  handleRunInterval = (speed) => {
-    this.currentStep = 0;
-    this.intervalID = setInterval(this.changeStep, 1000);
-    this.timeoutID = setTimeout(() => {
-      this.stopRunInterval(false);
-    }, (this.state.colorByStep.length + 1) * 1000);
-  };
-
-  changeStep = () => {
-    if (this.currentStep < this.state.colorByStep.length) {
-      this.currentStep = this.currentStep + 1;
-      this.setState({
-        colorStep: this.state.colorByStep[this.currentStep - 1],
-      });
-    }
-  };
-
-  stopRunInterval = (isCloseCalculate) => {
-    clearInterval(this.intervalID);
-    clearTimeout(this.timeoutID);
-    if (isCloseCalculate) this.setState({ colorStep: null });
+  setColor = (color) => {
+    this.setState({ colorStep: color });
   };
 
   render() {
@@ -104,6 +91,8 @@ class App extends Component {
           calculate={this.handleCalculate}
           setRunInterval={this.handleRunInterval}
           stopRunInterval={this.stopRunInterval}
+          setColor={this.setColor}
+          colorByStep={this.state.colorByStep}
         />
       </Aus>
     );
