@@ -4,69 +4,25 @@ import Aus from "./hoc/Aus";
 import { location } from "./Key/Location";
 import Controller from "./components/Controller";
 import axios from "axios";
-
-function adjacent2Matrix(adjacent) {
-  return Object.keys(adjacent)
-    .map((vertex, index) => {
-      return Object.keys(adjacent[vertex]).map((adjvertex, index) => {
-        return { idxStart: vertex, idxEnd: adjvertex };
-      });
-    })
-    .flat();
-}
-
-const edges = adjacent2Matrix(location.adjacent);
+import { displayPolyline, displayMarker } from "./components/Display";
 
 const mapStyles = {
   width: "100%",
   height: "100%",
 };
 
-export class App extends Component {
-  state = {
-    start: -1,
-    end: -1,
-  };
-
-  displayMarker = () => {
-    return Object.keys(location.points).map((key, index) => {
-      return (
-        <Marker
-          key={key}
-          id={key}
-          position={{
-            lat: location.points[key].lat,
-            lng: location.points[key].lng,
-          }}
-          label={key.toString()}
-          onClick={() => this.onClickMarker(key)}
-        />
-      );
-    });
-  };
-
-  displayPolyline = () => {
-    return edges.map((edge, index) => {
-      let line = [
-        {
-          lat: location.points[edge.idxStart].lat,
-          lng: location.points[edge.idxStart].lng,
-        },
-        {
-          lat: location.points[edge.idxEnd].lat,
-          lng: location.points[edge.idxEnd].lng,
-        },
-      ];
-      return (
-        <Polyline
-          path={line}
-          strokeColor="red"
-          strokeOpacity={0.8}
-          strokeWeight={2}
-        />
-      );
-    });
-  };
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      start: -1,
+      end: -1,
+      path: null,
+      colorByStep: null,
+      colorStep: null,
+      cost: null,
+    };
+  }
 
   onClickMarker = (index) => {
     console.log(index);
@@ -75,23 +31,49 @@ export class App extends Component {
     else this.setState({ start: index, end: -1 });
   };
 
-  fetchPlace = (mapProps, map) => {};
-
-  handleCalculate = (method = "a-star") => {
-    axios
-      .post("http://localhost:5000/" + method, {
-        location: location,
-        start: this.state.start,
-        end: this.state.end,
-      })
-      .then(
-        (response) => {
+  handleCalculate = (method = "astar") => {
+    if (this.state.start > -1 && this.state.end > -1)
+      axios
+        .post("http://localhost:5000/search/" + method, {
+          graphs: location.adjacent,
+          locations: location.points,
+          start: this.state.start,
+          end: this.state.end,
+        })
+        .then((response) => {
           console.log(response);
-        },
-        (error) => {
+          this.setState({
+            path: response.data.path,
+            colorByStep: response.data.all_nodes_color,
+            cost: response.data.cost,
+          });
+        })
+        .catch((error) => {
           console.log(error);
-        }
-      );
+        });
+  };
+
+  handleRunInterval = (speed) => {
+    this.currentStep = 0;
+    this.intervalID = setInterval(this.changeStep, 1000);
+    this.timeoutID = setTimeout(() => {
+      this.stopRunInterval(false);
+    }, (this.state.colorByStep.length + 1) * 1000);
+  };
+
+  changeStep = () => {
+    if (this.currentStep < this.state.colorByStep.length) {
+      this.currentStep = this.currentStep + 1;
+      this.setState({
+        colorStep: this.state.colorByStep[this.currentStep - 1],
+      });
+    }
+  };
+
+  stopRunInterval = (isCloseCalculate) => {
+    clearInterval(this.intervalID);
+    clearTimeout(this.timeoutID);
+    if (isCloseCalculate) this.setState({ colorStep: null });
   };
 
   render() {
@@ -108,12 +90,20 @@ export class App extends Component {
             lng: 106.6713485,
           }}
         >
-          {this.displayMarker()}
-          {this.displayPolyline()}
+          {displayMarker(
+            this.onClickMarker,
+            this.state.colorStep,
+            this.props.google
+          )}
+          {displayPolyline()}
         </Map>
         <Controller
           path={{ start: this.state.start, end: this.state.end }}
+          solution={this.state.path}
+          cost={this.state.cost}
           calculate={this.handleCalculate}
+          setRunInterval={this.handleRunInterval}
+          stopRunInterval={this.stopRunInterval}
         />
       </Aus>
     );
