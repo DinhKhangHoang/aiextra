@@ -78,6 +78,89 @@ export const displayMarker = (onClick, colorStep, google) => {
     }
   });
 };
+// export const DisplayMarker = (props) => {
+//   if (props.colorStep === null)
+//     return (
+//       <React.Fragment>
+//         {Object.keys(location.points).map((key, index) => {
+//           return (
+//             <Marker
+//               key={key}
+//               id={key}
+//               position={{
+//                 lat: location.points[key][0],
+//                 lng: location.points[key][1],
+//               }}
+//               icon={{
+//                 url: "http://maps.google.com/mapfiles/ms/icons/yellow.png",
+//                 scaledSize: new props.google.maps.Size(50, 50),
+//               }}
+//               label={key.toString()}
+//               onClick={() => props.onClick(key)}
+//             />
+//           );
+//         })}
+//       </React.Fragment>
+//     );
+//   return (
+//     <React.Fragment>
+//       {Object.keys(location.points).map((key, index) => {
+//         if (props.colorStep[key] === "white") {
+//           return (
+//             <Marker
+//               key={key}
+//               id={key}
+//               position={{
+//                 lat: location.points[key][0],
+//                 lng: location.points[key][1],
+//               }}
+//               icon={{
+//                 url: "http://maps.google.com/mapfiles/ms/icons/yellow.png",
+//                 scaledSize: new props.google.maps.Size(50, 50),
+//               }}
+//               label={key.toString()}
+//               onClick={() => props.onClick(key)}
+//             />
+//           );
+//         } else if (props.colorStep[key] === "gray") {
+//           return (
+//             <Marker
+//               key={key}
+//               id={key}
+//               position={{
+//                 lat: location.points[key][0],
+//                 lng: location.points[key][1],
+//               }}
+//               icon={{
+//                 url: "http://maps.google.com/mapfiles/ms/icons/purple.png",
+//                 scaledSize: new props.google.maps.Size(50, 50),
+//               }}
+//               label={key.toString()}
+//               onClick={() => props.onClick(key)}
+//             />
+//           );
+//         } else {
+//           return (
+//             <Marker
+//               key={key}
+//               id={key}
+//               position={{
+//                 lat: location.points[key][0],
+//                 lng: location.points[key][1],
+//               }}
+//               icon={{
+//                 url: `http://maps.google.com/mapfiles/ms/icons/${props.colorStep[key]}.png`,
+//                 scaledSize: new props.google.maps.Size(50, 50),
+//               }}
+//               label={key.toString()}
+//               onClick={() => props.onClick(key)}
+//             />
+//           );
+//         }
+//       })}
+//     </React.Fragment>
+//   );
+// };
 
 export const displayPolyline = () => {
   var edges = adjacent2List(location.adjacent);

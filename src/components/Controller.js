@@ -1,4 +1,4 @@
-import React, { useState, Component } from "react";
+import React, { Component } from "react";
 import {
   Card,
   Form,
@@ -16,138 +16,6 @@ import {
 } from "reactstrap";
 import styles from "./Controller.module.css";
 
-// const Controller = (props) => {
-//   const [isShowAnswer, setIsShowAnswer] = useState(false);
-//   const [isCalculate, setIsCalculate] = useState(false);
-//   const [isRunning, setIsRunning] = useState(false);
-
-//   function toggle() {
-//     setIsShowAnswer(!isShowAnswer);
-//   }
-
-//   function getCalculate(event) {
-//     event.preventDefault();
-//     const data = new FormData(event.target);
-//     props.calculate(data.get("alg"));
-//     setIsCalculate(true);
-//   }
-
-//   function closeCalculate() {
-//     if (isRunning) {
-//       props.stopRunInterval(true);
-//     }
-//     setIsCalculate(false);
-//     setIsRunning(false);
-//   }
-
-//   function runDemo(event) {
-//     event.preventDefault();
-//     if (isRunning) {
-//       props.stopRunInterval(false);
-//       setIsRunning(false);
-//     } else {
-//       const data = new FormData(event.target);
-//       props.setRunInterval(data.get("speed"));
-//       setIsRunning(true);
-//     }
-//   }
-
-//   if (isCalculate)
-//     return (
-//       <div className={styles.Card}>
-//         <Card>
-//           <CardBody>
-//             <Row>
-//               <Col>
-//                 <CardTitle className="h3 font-weight-bold">Solution</CardTitle>
-//               </Col>
-//               <Col>
-//                 <Button close color="danger" outline onClick={closeCalculate} />
-//               </Col>
-//             </Row>
-
-//             <CardSubtitle className="text-secondary">
-//               Card subtitle
-//             </CardSubtitle>
-//             <CardText>Solution: </CardText>
-
-//             <Button onClick={toggle}>
-//               {isShowAnswer ? "Hide" : "Show"} all steps
-//             </Button>
-//             <Form onSubmit={runDemo}>
-//               <Input type="select" name="speed">
-//                 <option value={0.5}>0.5x</option>
-//                 <option value={0.75}>0.75x</option>
-//                 <option value={1}>Normal</option>
-//                 <option value={1.25}>1.25x</option>
-//                 <option value={1.5}>1.5x</option>
-//               </Input>
-//               <Button className="btn btn-primary" type="submit">
-//                 {isRunning ? "Stop" : "Run"}
-//               </Button>
-//             </Form>
-//           </CardBody>
-//         </Card>
-
-//         <Collapse isOpen={isShowAnswer}>
-//           <ListGroup
-//             className="overflow-scroll"
-//             style={{
-//               maxHeight: "400px",
-//               marginBottom: "10px",
-//               overflow: "scroll",
-//             }}
-//           >
-//             {props.solution == null
-//               ? null
-//               : props.solution.map((value, index) => {
-//                   return (
-//                     <ListGroupItem tag="button" action key={index}>
-//                       Step {index + 1}: {value}
-//                     </ListGroupItem>
-//                   );
-//                 })}
-//           </ListGroup>
-//         </Collapse>
-//       </div>
-//     );
-//   else {
-//     return (
-//       <div className={styles.Card}>
-//         <Card>
-//           <CardBody>
-//             <CardTitle className="h3 font-weight-bold">
-//               Find the shortest path
-//             </CardTitle>
-//             <CardSubtitle className="text-primary">
-//               Choose start node and end node.
-//             </CardSubtitle>
-//             <CardText>
-//               Start node:{" "}
-//               {props.path.start < 0 ? "" : props.path.start.toString()}
-//             </CardText>
-//             <CardText>
-//               End node: {props.path.end < 0 ? "" : props.path.end.toString()}
-//             </CardText>
-//           </CardBody>
-//           <Form onSubmit={getCalculate}>
-//             <Input type="select" name="alg">
-//               <option value="astar">A star</option>
-//               <option value="ucs">Uniform cost search</option>
-//               <option value="greedy">Greedy best first search</option>
-//               <option value="bfs">Breath first search</option>
-//               <option value="dfs">Depth first search</option>
-//             </Input>
-//             <Button className="btn btn-primary" type="submit">
-//               Calculate the path
-//             </Button>
-//           </Form>
-//         </Card>
-//       </div>
-//     );
-//   }
-// };
-
 class Controller extends Component {
   state = {
     isShowAnswer: false,
@@ -157,8 +25,9 @@ class Controller extends Component {
 
   closeCalculate = () => {
     if (this.state.isRunning) {
-      this.props.stopRunInterval(true);
+      this.stopRunInterval(true);
     }
+    this.props.setColor(null);
     this.setState({
       isCalculate: false,
       isRunning: false,
@@ -180,15 +49,31 @@ class Controller extends Component {
   runDemo = (event) => {
     event.preventDefault();
     if (this.state.isRunning) {
-      this.props.stopRunInterval(false);
-      // setIsRunning(false);
+      this.stopRunInterval(false);
       this.setState({ isRunning: false });
     } else {
       const data = new FormData(event.target);
-      this.props.setRunInterval(data.get("speed"));
-      // setIsRunning(true);
+      this.currentStep = 0;
+      this.intervalID = setInterval(this.changeStep, 1000);
+      this.timeoutID = setTimeout(() => {
+        this.stopRunInterval(false);
+      }, (this.props.colorByStep.length + 1) * 1000);
       this.setState({ isRunning: true });
     }
+  };
+
+  changeStep = () => {
+    if (this.currentStep < this.props.colorByStep.length) {
+      this.currentStep = this.currentStep + 1;
+      this.props.setColor(this.props.colorByStep[this.currentStep - 1]);
+    }
+  };
+
+  stopRunInterval = (isCloseCalculate) => {
+    clearInterval(this.intervalID);
+    clearTimeout(this.timeoutID);
+    this.setState({ isRunning: false });
+    if (isCloseCalculate) this.props.setColor(null);
   };
 
   render() {
@@ -216,11 +101,42 @@ class Controller extends Component {
               <CardSubtitle className="text-secondary">
                 Card subtitle
               </CardSubtitle>
-              <CardText>Solution: </CardText>
+              <CardText>
+                Solution: from {this.props.path.start} to {this.props.path.end}
+              </CardText>
+              <CardText>
+                cost: {Math.round(this.props.cost * 100) / 100} meter
+              </CardText>
 
               <Button onClick={this.toggle}>
-                {this.state.isShowAnswer ? "Hide" : "Show"} all steps
+                {this.state.isShowAnswer ? "Hide" : "Show"} solution
               </Button>
+              <Collapse isOpen={this.state.isShowAnswer}>
+                <ListGroup
+                  className="overflow-scroll"
+                  style={{
+                    maxHeight: "250px",
+                    marginBottom: "10px",
+                    overflow: "scroll",
+                  }}
+                >
+                  {this.props.solution == null
+                    ? null
+                    : this.props.solution.map((value, index) => {
+                        return (
+                          <ListGroupItem tag="button" action key={index}>
+                            Step {index + 1}: {value}
+                          </ListGroupItem>
+                        );
+                      })}
+                </ListGroup>
+              </Collapse>
+              <CardSubtitle
+                className="text-primary"
+                style={{ paddingTop: "10px" }}
+              >
+                Choose speed to run search by step.
+              </CardSubtitle>
               <Form onSubmit={this.runDemo}>
                 <Input type="select" name="speed">
                   <option value={0.5}>0.5x</option>
@@ -235,27 +151,6 @@ class Controller extends Component {
               </Form>
             </CardBody>
           </Card>
-
-          <Collapse isOpen={this.state.isShowAnswer}>
-            <ListGroup
-              className="overflow-scroll"
-              style={{
-                maxHeight: "400px",
-                marginBottom: "10px",
-                overflow: "scroll",
-              }}
-            >
-              {this.props.solution == null
-                ? null
-                : this.props.solution.map((value, index) => {
-                    return (
-                      <ListGroupItem tag="button" action key={index}>
-                        Step {index + 1}: {value}
-                      </ListGroupItem>
-                    );
-                  })}
-            </ListGroup>
-          </Collapse>
         </div>
       );
     else {
@@ -267,7 +162,7 @@ class Controller extends Component {
                 Find the shortest path
               </CardTitle>
               <CardSubtitle className="text-primary">
-                Choose start node and end node.
+                Choose start node and end node. (click on marker)
               </CardSubtitle>
               <CardText>
                 Start node:{" "}
