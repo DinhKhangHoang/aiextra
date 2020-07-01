@@ -27,7 +27,7 @@ class Controller extends Component {
     if (this.state.isRunning) {
       this.stopRunInterval(true);
     }
-    this.props.setColor(null);
+    this.props.setColor(null, false);
     this.setState({
       isCalculate: false,
       isRunning: false,
@@ -43,7 +43,9 @@ class Controller extends Component {
     event.preventDefault();
     const data = new FormData(event.target);
     this.props.calculate(data.get("alg"));
-    this.setState({ isCalculate: true });
+    if (this.props.path.start > -1 && this.props.path.end > -1) {
+      this.setState({ isCalculate: true });
+    }
   };
 
   runDemo = (event) => {
@@ -54,10 +56,10 @@ class Controller extends Component {
     } else {
       const data = new FormData(event.target);
       this.currentStep = 0;
-      this.intervalID = setInterval(this.changeStep, 1000);
+      this.intervalID = setInterval(this.changeStep, data.get("speed") * 1000);
       this.timeoutID = setTimeout(() => {
         this.stopRunInterval(false);
-      }, (this.props.colorByStep.length + 1) * 1000);
+      }, (this.props.colorByStep.length + 1) * data.get("speed") * 1000);
       this.setState({ isRunning: true });
     }
   };
@@ -139,9 +141,9 @@ class Controller extends Component {
               </CardSubtitle>
               <Form onSubmit={this.runDemo}>
                 <Input type="select" name="speed">
+                  <option value={1}>Normal</option>
                   <option value={0.5}>0.5x</option>
                   <option value={0.75}>0.75x</option>
-                  <option value={1}>Normal</option>
                   <option value={1.25}>1.25x</option>
                   <option value={1.5}>1.5x</option>
                 </Input>

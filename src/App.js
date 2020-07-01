@@ -1,16 +1,15 @@
 import React, { Component } from "react";
-import {
-  Map,
-  GoogleApiWrapper,
-  Marker,
-  Polyline,
-  InfoWindow,
-} from "google-maps-react";
+import { Map, GoogleApiWrapper } from "google-maps-react";
 import Aus from "./hoc/Aus";
 import { location } from "./Key/Location";
 import Controller from "./components/Controller";
 import axios from "axios";
-import { displayPolyline, displayMarker } from "./components/Display";
+import {
+  displayPolyline,
+  displayMarker,
+  displaySolution,
+} from "./components/Display";
+import Alert from "./components/Alert";
 
 const mapStyles = {
   width: "100%",
@@ -27,6 +26,10 @@ class App extends Component {
       colorByStep: null,
       colorStep: null,
       cost: null,
+      alert: {
+        show: false,
+        text: "",
+      },
     };
   }
 
@@ -42,7 +45,7 @@ class App extends Component {
       axios
         .post("http://localhost:5000/search/" + method, {
           graphs: location.adjacent,
-          locations: location.points,
+          locations: location.points2,
           start: this.state.start,
           end: this.state.end,
         })
@@ -57,13 +60,37 @@ class App extends Component {
         .catch((error) => {
           console.log(error);
         });
+    else {
+      this.setState({
+        alert: { show: true, text: "Please choose start node and end node." },
+      });
+    }
   };
 
-  setColor = (color) => {
-    this.setState({ colorStep: color });
+  setAlert = () => {
+    this.setState({ alert: { show: false, text: "" } });
+  };
+
+  setColor = (color, solution = true) => {
+    if (solution) {
+      this.setState({ colorStep: color });
+    } else {
+      this.setState({ colorStep: color, path: null });
+    }
+  };
+
+  onClickPolyline = (props, line, e) => {
+    this.setState({
+      alert: {
+        show: true,
+        text: location.adjacent[props.start][props.end].toString() + " meter",
+      },
+    });
   };
 
   render() {
+    let polylines = displayPolyline(this.state.path, this.onClickPolyline);
+    let solution = displaySolution(this.state.path, this.onClickPolyline);
     return (
       <Aus>
         <Map
@@ -82,7 +109,9 @@ class App extends Component {
             this.state.colorStep,
             this.props.google
           )}
-          {displayPolyline()}
+
+          {polylines}
+          {solution}
         </Map>
         <Controller
           path={{ start: this.state.start, end: this.state.end }}
@@ -93,6 +122,11 @@ class App extends Component {
           stopRunInterval={this.stopRunInterval}
           setColor={this.setColor}
           colorByStep={this.state.colorByStep}
+        />
+        <Alert
+          visible={this.state.alert.show}
+          setDismiss={this.setAlert}
+          text={this.state.alert.text}
         />
       </Aus>
     );
