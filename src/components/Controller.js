@@ -14,6 +14,7 @@ import {
   Row,
   Col,
 } from "reactstrap";
+import HeuristicTable from "./HeuristicTable";
 import styles from "./Controller.module.css";
 
 class Controller extends Component {
@@ -21,6 +22,7 @@ class Controller extends Component {
     isShowAnswer: false,
     isCalculate: false,
     isRunning: false,
+    isEditing: false,
   };
 
   closeCalculate = () => {
@@ -78,8 +80,20 @@ class Controller extends Component {
     if (isCloseCalculate) this.props.setColor(null);
   };
 
+  editHeuristicHandler = () => {
+    if (this.props.path.start > -1 && this.props.path.end > -1) {
+      this.setState({ isEditing: true });
+    } else {
+      this.props.setAlert({
+        show: true,
+        text: "Please choose start node and end node!",
+      });
+    }
+  };
+
   render() {
-    if (this.state.isCalculate)
+    if (this.state.isCalculate) {
+      this.props.setClickMarkerAvailable(false);
       return (
         <div className={styles.Card}>
           <Card>
@@ -110,7 +124,7 @@ class Controller extends Component {
                 cost: {Math.round(this.props.cost * 100) / 100} meter
               </CardText>
 
-              <Button onClick={this.toggle}>
+              <Button onClick={this.toggle} color="success" outline>
                 {this.state.isShowAnswer ? "Hide" : "Show"} solution
               </Button>
               <Collapse isOpen={this.state.isShowAnswer}>
@@ -147,15 +161,53 @@ class Controller extends Component {
                   <option value={1.25}>1.25x</option>
                   <option value={1.5}>1.5x</option>
                 </Input>
-                <Button className="btn btn-primary" type="submit">
+                <Button
+                  type="submit"
+                  style={{ paddingTop: "10px" }}
+                  color="danger"
+                  outline
+                >
                   {this.state.isRunning ? "Stop" : "Run"}
                 </Button>
               </Form>
+              {!this.state.isRunning ? null : (
+                <div>
+                  <CardText>
+                    <img
+                      src="http://maps.google.com/mapfiles/ms/icons/purple.png"
+                      alt="Node was processed"
+                    />
+                    Node was processed
+                  </CardText>
+                  <CardText>
+                    <img
+                      src="http://maps.google.com/mapfiles/ms/icons/red.png"
+                      alt="Node is processing"
+                    />
+                    Node is processing
+                  </CardText>
+                  <CardText>
+                    <img
+                      src="http://maps.google.com/mapfiles/ms/icons/orange.png"
+                      alt="Node is in frontier"
+                    />
+                    Node is in frontier
+                  </CardText>
+                  <CardText>
+                    <img
+                      src="http://maps.google.com/mapfiles/ms/icons/green.png"
+                      alt="Node is goal"
+                    />
+                    Node is goal
+                  </CardText>
+                </div>
+              )}
             </CardBody>
           </Card>
         </div>
       );
-    else {
+    } else if (!this.state.isEditing) {
+      this.props.setClickMarkerAvailable(true);
       return (
         <div className={styles.Card}>
           <Card>
@@ -185,12 +237,31 @@ class Controller extends Component {
                 <option value="bfs">Breath first search</option>
                 <option value="dfs">Depth first search</option>
               </Input>
-              <Button className="btn btn-primary" type="submit">
+              <Button
+                outline
+                block
+                color="success"
+                type="submit"
+                style={{ paddingTop: "10px" }}
+              >
                 Calculate the path
               </Button>
             </Form>
+            <Button outline color="primary" onClick={this.editHeuristicHandler}>
+              Edit the heuristic values
+            </Button>
           </Card>
         </div>
+      );
+    } else {
+      this.props.setClickMarkerAvailable(false);
+      return (
+        <HeuristicTable
+          closeEdit={() => this.setState({ isEditing: false })}
+          goal={this.props.path.end}
+          setHeuristicValues={this.props.setHeuristicValues}
+          heuristics={this.props.heuristics}
+        />
       );
     }
   }

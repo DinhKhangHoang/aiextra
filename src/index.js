@@ -4,11 +4,12 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import {key} from "./Key/key";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'antd/dist/antd.css';
 
 ReactDOM.render(
-  <React.StrictMode>
+  
     <App apiKey={key.googleApiKey}/>
-  </React.StrictMode>,
+  ,
   document.getElementById('root')
 );
 

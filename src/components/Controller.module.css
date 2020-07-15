@@ -1,9 +1,9 @@
-.Card{
-    position: absolute;
-    min-width : 150px;
-    width: 300px;
-    max-height: 100vh;
-    z-index: 5;
-    top: 3%;
-    left :1%;
+.Card {
+  position: absolute;
+  min-width: 150px;
+  width: 300px;
+  max-height: 100vh;
+  z-index: 5;
+  top: 3%;
+  left: 1%;
 }

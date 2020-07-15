@@ -85,7 +85,6 @@ export const displaySolution = (path, onClick) => {
     if (index === path.length - 1) {
       return;
     }
-    // console.log(path.length);
     let line = [
       {
         lat: location.points[vertex][0],

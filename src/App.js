@@ -10,11 +10,18 @@ import {
   displaySolution,
 } from "./components/Display";
 import Alert from "./components/Alert";
+import {
+  calculateHeuristic,
+  latLngToMeter,
+  dict2ListHeuristic,
+  list2DictHeuristic,
+} from "./components/supportFunc";
 
 const mapStyles = {
   width: "100%",
   height: "100%",
 };
+const locationByMeter = latLngToMeter(location.points);
 
 class App extends Component {
   constructor(props) {
@@ -30,24 +37,30 @@ class App extends Component {
         show: false,
         text: "",
       },
+      heuristics: [],
     };
+    this.canClickMarker = true;
   }
 
-  onClickMarker = (index) => {
-    console.log(index);
-    if (this.state.start < 0) this.setState({ start: index });
-    else if (this.state.end < 0) this.setState({ end: index });
-    else this.setState({ start: index, end: -1 });
-  };
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.end > -1 && this.state.end !== prevState.end) {
+      this.setState({
+        heuristics: dict2ListHeuristic(
+          calculateHeuristic(this.state.end, location.points)
+        ),
+      });
+    }
+  }
 
   handleCalculate = (method = "astar") => {
     if (this.state.start > -1 && this.state.end > -1)
       axios
         .post("http://localhost:5000/search/" + method, {
           graphs: location.adjacent,
-          locations: location.points2,
+          locations: locationByMeter,
           start: this.state.start,
           end: this.state.end,
+          heuristics: list2DictHeuristic(this.state.heuristics),
         })
         .then((response) => {
           console.log(response);
@@ -61,14 +74,15 @@ class App extends Component {
           console.log(error);
         });
     else {
-      this.setState({
-        alert: { show: true, text: "Please choose start node and end node." },
+      this.setAlert({
+        show: true,
+        text: "Please choose start node and end node.",
       });
     }
   };
 
-  setAlert = () => {
-    this.setState({ alert: { show: false, text: "" } });
+  setAlert = (alertInfo = { show: false, text: "" }) => {
+    this.setState({ alert: alertInfo });
   };
 
   setColor = (color, solution = true) => {
@@ -79,18 +93,39 @@ class App extends Component {
     }
   };
 
+  setClickMarkerAvailable = (val) => {
+    this.canClickMarker = val;
+  };
+
+  setHeuristicValues = (listData) => {
+    this.setState({ heuristics: listData });
+    console.log(this.state.heuristics);
+  };
+
   onClickPolyline = (props, line, e) => {
-    this.setState({
-      alert: {
-        show: true,
-        text: location.adjacent[props.start][props.end].toString() + " meter",
-      },
+    this.setAlert({
+      show: true,
+      text: location.adjacent[props.start][props.end].toString() + " meter",
     });
+  };
+
+  onClickMarker = (index) => {
+    if (this.canClickMarker) {
+      if (this.state.start < 0) this.setState({ start: index });
+      else if (this.state.end < 0) this.setState({ end: index });
+      else this.setState({ start: index, end: -1 });
+    }
   };
 
   render() {
     let polylines = displayPolyline(this.state.path, this.onClickPolyline);
     let solution = displaySolution(this.state.path, this.onClickPolyline);
+    let markers = displayMarker(
+      this.onClickMarker,
+      this.state.colorStep,
+      this.props.google
+    );
+
     return (
       <Aus>
         <Map
@@ -104,12 +139,7 @@ class App extends Component {
             lng: 106.6713485,
           }}
         >
-          {displayMarker(
-            this.onClickMarker,
-            this.state.colorStep,
-            this.props.google
-          )}
-
+          {markers}
           {polylines}
           {solution}
         </Map>
@@ -122,6 +152,10 @@ class App extends Component {
           stopRunInterval={this.stopRunInterval}
           setColor={this.setColor}
           colorByStep={this.state.colorByStep}
+          setHeuristicValues={this.setHeuristicValues}
+          heuristics={this.state.heuristics}
+          setClickMarkerAvailable={this.setClickMarkerAvailable}
+          setAlert={this.setAlert}
         />
         <Alert
           visible={this.state.alert.show}
