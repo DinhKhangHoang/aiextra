@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Map, GoogleApiWrapper } from "google-maps-react";
+import { Map, GoogleApiWrapper, InfoWindow } from "google-maps-react";
 import Aus from "./hoc/Aus";
 import { location } from "./Key/Location";
 import Controller from "./components/Controller";
@@ -33,6 +33,7 @@ class App extends Component {
       colorByStep: null,
       colorStep: null,
       cost: null,
+      all_node_f: null,
       alert: {
         show: false,
         text: "",
@@ -42,32 +43,38 @@ class App extends Component {
     this.canClickMarker = true;
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.end > -1 && this.state.end !== prevState.end) {
-      this.setState({
-        heuristics: dict2ListHeuristic(
-          calculateHeuristic(this.state.end, location.points)
-        ),
-      });
-    }
-  }
-
   handleCalculate = (method = "astar") => {
+    console.log({
+      graphs: location.adjacent,
+      locations: locationByMeter,
+      start: this.state.start,
+      end: this.state.end,
+      heuristics: list2DictHeuristic(this.state.heuristics),
+    });
     if (this.state.start > -1 && this.state.end > -1)
       axios
-        .post("http://localhost:5000/search/" + method, {
-          graphs: location.adjacent,
-          locations: locationByMeter,
-          start: this.state.start,
-          end: this.state.end,
-          heuristics: list2DictHeuristic(this.state.heuristics),
-        })
+        .post(
+          "http://localhost:5000/search/" + method,
+          {
+            graphs: location.adjacent,
+            locations: locationByMeter,
+            start: this.state.start,
+            end: this.state.end,
+            heuristics: list2DictHeuristic(this.state.heuristics),
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
         .then((response) => {
           console.log(response);
           this.setState({
             path: response.data.path,
             colorByStep: response.data.all_nodes_color,
             cost: response.data.cost,
+            all_node_f: response.data.all_node_f,
           });
         })
         .catch((error) => {
@@ -103,6 +110,7 @@ class App extends Component {
   };
 
   onClickPolyline = (props, line, e) => {
+    console.log(line);
     this.setAlert({
       show: true,
       text: location.adjacent[props.start][props.end].toString() + " meter",
@@ -112,9 +120,19 @@ class App extends Component {
   onClickMarker = (index) => {
     if (this.canClickMarker) {
       if (this.state.start < 0) this.setState({ start: index });
-      else if (this.state.end < 0) this.setState({ end: index });
-      else this.setState({ start: index, end: -1 });
+      else if (this.state.end < 0) {
+        this.setState({
+          end: index,
+          heuristics: dict2ListHeuristic(
+            calculateHeuristic(index, location.points)
+          ),
+        });
+      } else this.setState({ start: index, end: -1 });
     }
+  };
+
+  setInfoWindow = (info) => {
+    this.setState({ infoWindow: info });
   };
 
   render() {
@@ -152,6 +170,7 @@ class App extends Component {
           stopRunInterval={this.stopRunInterval}
           setColor={this.setColor}
           colorByStep={this.state.colorByStep}
+          all_node_f={this.state.all_node_f}
           setHeuristicValues={this.setHeuristicValues}
           heuristics={this.state.heuristics}
           setClickMarkerAvailable={this.setClickMarkerAvailable}
