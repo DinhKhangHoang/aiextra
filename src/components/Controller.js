@@ -61,17 +61,16 @@ class Controller extends Component {
       this.intervalID = setInterval(this.changeStep, data.get("speed") * 1000);
       this.timeoutID = setTimeout(() => {
         this.stopRunInterval(false);
-      }, (this.props.colorByStep.length + 1) * data.get("speed") * 1000);
+      }, (this.props.solution.all_nodes_color.length + 1) * data.get("speed") * 1000);
       this.setState({ isRunning: true });
     }
   };
 
   changeStep = () => {
-    if (this.currentStep < this.props.colorByStep.length) {
+    if (this.currentStep < this.props.solution.all_nodes_color.length) {
       this.currentStep = this.currentStep + 1;
-      // console.log(this.props.all_node_f);
-      let colorStep = this.props.colorByStep[this.currentStep - 1];
-      if (this.props.all_node_f) {
+      let colorStep = this.props.solution.all_nodes_color[this.currentStep - 1];
+      if (this.props.solution.all_node_f) {
         let processing_node = -1;
         for (let i in colorStep) {
           if (colorStep[i] === "red") {
@@ -82,7 +81,9 @@ class Controller extends Component {
           this.props.setAlert({
             show: true,
             text: `Node ${processing_node} is processing with f=${
-              this.props.all_node_f[this.currentStep - 1][processing_node]
+              this.props.solution.all_node_f[this.currentStep - 1][
+                processing_node
+              ]
             }`,
           });
         }
@@ -139,7 +140,7 @@ class Controller extends Component {
                 Solution: from {this.props.path.start} to {this.props.path.end}
               </CardText>
               <CardText>
-                cost: {Math.round(this.props.cost * 100) / 100} meter
+                cost: {Math.round(this.props.solution.cost * 100) / 100} meter
               </CardText>
 
               <Button onClick={this.toggle} color="success" outline>
@@ -154,9 +155,9 @@ class Controller extends Component {
                     overflow: "scroll",
                   }}
                 >
-                  {this.props.solution == null
+                  {this.props.solution.path == null
                     ? null
-                    : this.props.solution.map((value, index) => {
+                    : this.props.solution.path.map((value, index) => {
                         return (
                           <ListGroupItem tag="button" action key={index}>
                             Step {index + 1}: {value}

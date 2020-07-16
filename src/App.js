@@ -1,14 +1,8 @@
 import React, { Component } from "react";
-import { Map, GoogleApiWrapper, InfoWindow } from "google-maps-react";
 import Aus from "./hoc/Aus";
 import { location } from "./Key/Location";
 import Controller from "./components/Controller";
 import axios from "axios";
-import {
-  displayPolyline,
-  displayMarker,
-  displaySolution,
-} from "./components/Display";
 import Alert from "./components/Alert";
 import {
   calculateHeuristic,
@@ -16,11 +10,8 @@ import {
   dict2ListHeuristic,
   list2DictHeuristic,
 } from "./components/supportFunc";
+import MyMap from "./components/MyMap";
 
-const mapStyles = {
-  width: "100%",
-  height: "100%",
-};
 const locationByMeter = latLngToMeter(location.points);
 
 class App extends Component {
@@ -29,11 +20,13 @@ class App extends Component {
     this.state = {
       start: -1,
       end: -1,
-      path: null,
-      colorByStep: null,
       colorStep: null,
-      cost: null,
-      all_node_f: null,
+      solution: {
+        path: null,
+        all_node_f: null,
+        all_nodes_color: null,
+        cost: null,
+      },
       alert: {
         show: false,
         text: "",
@@ -63,12 +56,7 @@ class App extends Component {
         )
         .then((response) => {
           console.log(response);
-          this.setState({
-            path: response.data.path,
-            colorByStep: response.data.all_nodes_color,
-            cost: response.data.cost,
-            all_node_f: response.data.all_node_f,
-          });
+          this.setState({ solution: response.data });
         })
         .catch((error) => {
           console.log(error);
@@ -89,7 +77,15 @@ class App extends Component {
     if (isShowSolution) {
       this.setState({ colorStep: color });
     } else {
-      this.setState({ colorStep: color, path: null });
+      this.setState({
+        colorStep: color,
+        solution: {
+          path: null,
+          all_node_f: null,
+          all_nodes_color: null,
+          cost: null,
+        },
+      });
     }
   };
 
@@ -129,40 +125,22 @@ class App extends Component {
   };
 
   render() {
-    let polylines = displayPolyline(this.state.path, this.onClickPolyline);
-    let solution = displaySolution(this.state.path, this.onClickPolyline);
-    let markers = displayMarker(
-      this.onClickMarker,
-      this.state.colorStep,
-      this.props.google
-    );
-
     return (
       <Aus>
-        <Map
-          google={this.props.google}
-          zoom={14}
-          style={mapStyles}
-          onClick={this.mapClicked}
-          initialCenter={{
-            lat: 10.7730737,
-            lng: 106.6713485,
-          }}
-        >
-          {markers}
-          {polylines}
-          {solution}
-        </Map>
+        <MyMap
+          apiKey={this.props.apiKey}
+          path={this.state.solution === null ? null : this.state.solution.path}
+          onClickMarker={this.onClickMarker}
+          onClickPolyline={this.onClickPolyline}
+          colorStep={this.state.colorStep}
+        />
         <Controller
           path={{ start: this.state.start, end: this.state.end }}
-          solution={this.state.path}
-          cost={this.state.cost}
+          solution={this.state.solution}
           calculate={this.handleCalculate}
           setRunInterval={this.handleRunInterval}
           stopRunInterval={this.stopRunInterval}
           setColor={this.setColor}
-          colorByStep={this.state.colorByStep}
-          all_node_f={this.state.all_node_f}
           setHeuristicValues={this.setHeuristicValues}
           heuristics={this.state.heuristics}
           setClickMarkerAvailable={this.setClickMarkerAvailable}
@@ -178,6 +156,4 @@ class App extends Component {
   }
 }
 
-export default GoogleApiWrapper((props) => ({
-  apiKey: props.apiKey,
-}))(App);
+export default App;
