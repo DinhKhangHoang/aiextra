@@ -44,13 +44,6 @@ class App extends Component {
   }
 
   handleCalculate = (method = "astar") => {
-    console.log({
-      graphs: location.adjacent,
-      locations: locationByMeter,
-      start: this.state.start,
-      end: this.state.end,
-      heuristics: list2DictHeuristic(this.state.heuristics),
-    });
     if (this.state.start > -1 && this.state.end > -1)
       axios
         .post(
@@ -92,8 +85,8 @@ class App extends Component {
     this.setState({ alert: alertInfo });
   };
 
-  setColor = (color, solution = true) => {
-    if (solution) {
+  setColor = (color, isShowSolution = true) => {
+    if (isShowSolution) {
       this.setState({ colorStep: color });
     } else {
       this.setState({ colorStep: color, path: null });
@@ -148,7 +141,6 @@ class App extends Component {
       <Aus>
         <Map
           google={this.props.google}
-          onReady={this.fetchPlace}
           zoom={14}
           style={mapStyles}
           onClick={this.mapClicked}

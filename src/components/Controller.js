@@ -71,19 +71,21 @@ class Controller extends Component {
       this.currentStep = this.currentStep + 1;
       // console.log(this.props.all_node_f);
       let colorStep = this.props.colorByStep[this.currentStep - 1];
-      let processing_node = -1;
-      for (let i in colorStep) {
-        if (colorStep[i] === "red") {
-          processing_node = i;
+      if (this.props.all_node_f) {
+        let processing_node = -1;
+        for (let i in colorStep) {
+          if (colorStep[i] === "red") {
+            processing_node = i;
+          }
         }
-      }
-      if (processing_node > -1) {
-        this.props.setAlert({
-          show: true,
-          text: `Node ${processing_node} is processing with f=${
-            this.props.all_node_f[this.currentStep - 1][processing_node]
-          }`,
-        });
+        if (processing_node > -1) {
+          this.props.setAlert({
+            show: true,
+            text: `Node ${processing_node} is processing with f=${
+              this.props.all_node_f[this.currentStep - 1][processing_node]
+            }`,
+          });
+        }
       }
       this.props.setColor(colorStep);
     }
