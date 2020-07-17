@@ -14,9 +14,7 @@ function calculateHeuristic(index, locations) {
   var result = {};
   let point = toLatLng([...locations[index]].reverse());
   for (let i in locations) {
-    if (index.toString() !== i) {
-      result[i] = distanceTo(point, toLatLng([...locations[i]].reverse()));
-    }
+    result[i] = distanceTo(point, toLatLng([...locations[i]].reverse()));
   }
   return result;
 }
