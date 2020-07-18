@@ -3,6 +3,7 @@
 # dependencies
 /node_modules
 /src/assets
+/src/Key/key.js
 /.pnp
 .pnp.js
 
