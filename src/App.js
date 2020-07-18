@@ -99,10 +99,11 @@ class App extends Component {
   };
 
   onClickPolyline = (props, line, e) => {
-    console.log(line);
     this.setAlert({
       show: true,
-      text: location.adjacent[props.start][props.end].toString() + " meter",
+      text: `From ${props.start} to ${props.end}: ${location.adjacent[
+        props.start
+      ][props.end].toString()} meter`,
     });
   };
 

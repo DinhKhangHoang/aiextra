@@ -6,7 +6,7 @@ const AlertExample = (props) => {
 
   return (
     <Alert
-      color="info"
+      color="danger"
       isOpen={props.visible}
       toggle={onDismiss}
       style={{ position: "fixed", top: "5%", right: "30%" }}

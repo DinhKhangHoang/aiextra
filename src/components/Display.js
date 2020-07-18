@@ -142,7 +142,7 @@ export const displayPolyline = (path, onClick) => {
     return (
       <Polyline
         path={line}
-        strokeColor="white"
+        strokeColor="#0099cc"
         strokeOpacity={0.8}
         strokeWeight={3}
         key={edge.idxStart.toString() + "-" + edge.idxEnd.toString()}
