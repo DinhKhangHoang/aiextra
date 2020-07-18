@@ -21,4 +21,6 @@
   z-index: 5;
   top: 0%;
   left: 0%;
+  border-width: 10px;
+  box-shadow: 5px 10px 5px gray;
 }

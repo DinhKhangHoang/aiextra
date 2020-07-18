@@ -6,4 +6,6 @@
   z-index: 5;
   top: 3%;
   left: 1%;
+  border-width: 10px;
+  box-shadow: 5px 10px 5px gray;
 }
