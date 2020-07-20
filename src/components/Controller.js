@@ -253,7 +253,7 @@ class Controller extends Component {
                 <option value="astar">A star</option>
                 <option value="ucs">Uniform cost search</option>
                 <option value="greedy">Greedy best first search</option>
-                <option value="bfs">Breath first search</option>
+                <option value="bfs">Breadth first search</option>
                 <option value="dfs">Depth first search</option>
               </Input>
               <Button

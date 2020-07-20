@@ -9,7 +9,7 @@ const AlertExample = (props) => {
       color="danger"
       isOpen={props.visible}
       toggle={onDismiss}
-      style={{ position: "fixed", top: "5%", right: "30%" }}
+      style={{ position: "fixed", top: "2%", right: "30%" }}
     >
       {props.text}
     </Alert>
